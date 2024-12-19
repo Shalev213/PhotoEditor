@@ -571,7 +571,7 @@ public class EditPanel extends JPanel {
 //        this.brightButton.setVisible(true);
 //        this.brightButton.setBounds(darkButton.getX() + darkButton.getWidth() + 5, darkButton.getY(), mirrorUpButton.getWidth(), darkButton.getHeight());
         this.saveButton.setVisible(true);
-        this.saveButton.setBounds(darkButton.getX() + darkButton.getWidth() + 5, darkButton.getY(), mirrorUpButton.getWidth(), darkButton.getHeight());
+        this.saveButton.setBounds(darkButton.getX() + darkButton.getWidth() + 5, darkButton.getY(), (int) (1.7 * mirrorUpButton.getWidth()), darkButton.getHeight());
 
 
         this.darkBrightSlider.setVisible(true);
