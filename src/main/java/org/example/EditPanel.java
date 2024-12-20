@@ -22,15 +22,15 @@ public class EditPanel extends JPanel {
     private boolean isDarkClicked = false;
     private String imagePath;
     private File fileImage;
-    private JButton saveButton;
-    private JButton returnButton;
-    private JButton whiteBlackButton;
-    private JButton darkButton;
-    private JButton brightButton;
-    private JButton mirrorSideButton;
-    private JButton mirrorUpButton;
-    private JButton previousButton;
-    private JButton nextButton;
+    private SystemButton saveButton;
+    private SystemButton returnButton;
+    private SystemButton whiteBlackButton;
+    private SystemButton smoothButton;
+    private SystemButton brightButton;
+    private SystemButton mirrorSideButton;
+    private SystemButton mirrorUpButton;
+    private SystemButton previousButton;
+    private SystemButton nextButton;
     private BufferedImage bufferedImage;
     private JLabel labelPhoto;
     private JLabel typeOfError;
@@ -55,20 +55,19 @@ public class EditPanel extends JPanel {
         this.lobbyBackground = new ImageIcon("src/main/resources/EditorBackground.png");
 
         this.changedValues = new boolean[7];
-        this.previousBufferedStack = new Stack<>();
         this.nextBufferedStack = new Stack<>();
+        this.previousBufferedStack = new Stack<>();
         this.previousSlideValueStack = new Stack<>();
 
-        this.previousButton = new JButton("<--");
-        this.previousButton.setVisible(false);
-        this.previousButton.setFont(new Font("Arial", Font.BOLD, 20));
-        this.previousButton.setFocusPainted(false);
-        this.previousButton.setForeground(new Color(0xFFFFFF));
-        this.previousButton.setBackground(new Color(0x0560E8));
-        this.previousButton.setFocusable(true);
-
+        this.previousButton = new SystemButton("<--", 20, false);
 
         this.previousButton.addActionListener(e -> {
+            if (!previousSlideValueStack.empty()) {
+                int previousValue = previousSlideValueStack.pop();
+                this.darkBrightSlider.setValue(previousValue);  // עדכון הערך ב-Slider
+            } else {
+                this.darkBrightSlider.setValue(3);
+            }
             if (!this.previousBufferedStack.empty()) {
                 // שמירה על התמונה הנוכחית למחסנית "next"
                 this.nextBufferedStack.push(this.bufferedImage);
@@ -79,25 +78,20 @@ public class EditPanel extends JPanel {
 
 
                 // עדכון ה-Slider לערך הקודם מתוך מחסנית הערכים
-                if (!previousSlideValueStack.empty()) {
-                    int previousValue = previousSlideValueStack.pop();
-                    this.darkBrightSlider.setValue(previousValue);  // עדכון הערך ב-Slider
-                }
+//                if (!previousSlideValueStack.empty()) {
+//                    int previousValue = previousSlideValueStack.pop();
+//                    this.darkBrightSlider.setValue(previousValue);  // עדכון הערך ב-Slider
+//                }
 
                 isWBClicked = false;
                 this.repaint();
             }
+
         });
         this.add(previousButton);
 
 
-        this.nextButton = new JButton("-->");
-        this.nextButton.setVisible(false);
-        this.nextButton.setFont(new Font("Arial", Font.BOLD, 20));
-        this.nextButton.setFocusPainted(false);
-        this.nextButton.setForeground(new Color(0xFFFFFF));
-        this.nextButton.setBackground(new Color(0x0560E8));
-        this.nextButton.setFocusable(true);
+        this.nextButton = new SystemButton("-->", 20, false);
 
         this.nextButton.addActionListener(e -> {
 
@@ -123,12 +117,7 @@ public class EditPanel extends JPanel {
         this.setLayout(null);
         this.setSize(800, 700);//setDefaultPanel()
 
-        this.returnButton = new JButton("return");
-        this.returnButton.setFont(new Font("Arial", Font.BOLD, 30));
-        this.returnButton.setFocusPainted(false);
-        this.returnButton.setForeground(new Color(0xFFFFFF));
-        this.returnButton.setBackground(new Color(0x0560E8));
-        this.returnButton.setFocusable(true);
+        this.returnButton = new SystemButton("return", 30, false);
 
         InputMap inputMap = returnButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = returnButton.getActionMap();
@@ -151,9 +140,7 @@ public class EditPanel extends JPanel {
         labelTable.put(0, createCustomLabel("dark", customFont));
         labelTable.put(3, createCustomLabel("medium", customFont));
         labelTable.put(6, createCustomLabel("bright  ", customFont));
-//        this.darkBrightSlider.setFont(new Font("Arial", Font.BOLD, 70));
-//        this.darkBrightSlider.setForeground(new Color(0xE011E60A, true));
-        this.darkBrightSlider.setBackground(Color.cyan);
+        this.darkBrightSlider.setBackground(null);
 
         // Set the custom labels to the slider
         this.darkBrightSlider.setLabelTable(labelTable);
@@ -189,13 +176,7 @@ public class EditPanel extends JPanel {
         this.darkBrightSlider.setPaintLabels(true);
         this.add(darkBrightSlider);
 
-        this.whiteBlackButton = new JButton("<html>black<br>and white");
-        this.whiteBlackButton.setFont(new Font("Arial", Font.BOLD, 20));
-        this.whiteBlackButton.setFocusPainted(false);
-        this.whiteBlackButton.setForeground(new Color(0x02EBC0));
-        this.whiteBlackButton.setBackground(new Color(231, 80, 6));
-        this.whiteBlackButton.setVisible(false);
-
+        this.whiteBlackButton = new SystemButton("<html>black<br>and white", 20, true);
         this.add(this.whiteBlackButton);
 
         this.whiteBlackButton.addActionListener(e -> {
@@ -209,43 +190,20 @@ public class EditPanel extends JPanel {
             }
         });
 
-        this.saveButton = new JButton("Save Image");
-        this.saveButton.setFont(new Font("Arial", Font.BOLD, 20));
-        this.saveButton.setFocusPainted(false);
-        this.saveButton.setForeground(new Color(0x02EBC0));
-        this.saveButton.setBackground(new Color(231, 80, 6));
-        this.saveButton.setVisible(false);
-        this.saveButton.addActionListener(e -> saveImage());
+        this.saveButton = new SystemButton("Save", 20, false);
+        this.saveButton.addActionListener(_ -> saveImage());
         this.add(this.saveButton);
 
-        this.darkButton = new JButton("dark");
-        this.darkButton.setFont(new Font("Arial", Font.BOLD, 20));
-        this.darkButton.setFocusPainted(false);
-        this.darkButton.setForeground(new Color(0x02EBC0));
-        this.darkButton.setBackground(new Color(231, 80, 6));
-        this.darkButton.setVisible(false);
+        this.smoothButton = new SystemButton("smooth", 20, true);
+        this.add(this.smoothButton);
 
-        this.add(this.darkButton);
-
-        this.darkButton.addActionListener(e -> {
+        this.smoothButton.addActionListener(_ -> {
             this.nextBufferedStack.clear();
             this.previousBufferedStack.push(this.bufferedImage);
-            if (!isDarkClicked) {
-                isDarkClicked = true;
-                this.bufferedImage = dark(this.bufferedImage);
-            } else {
-                isDarkClicked = false;
-                this.bufferedImage = bright(this.bufferedImage);
-            }
+            this.bufferedImage = smoothing(this.bufferedImage);
         });
 
-        this.brightButton = new JButton("bright");
-        this.brightButton.setFont(new Font("Arial", Font.BOLD, 20));
-        this.brightButton.setFocusPainted(false);
-        this.brightButton.setForeground(new Color(0x02EBC0));
-        this.brightButton.setBackground(new Color(231, 80, 6));
-        this.brightButton.setVisible(false);
-
+        this.brightButton = new SystemButton("bright", 20, true);
         this.add(this.brightButton);
 
         this.brightButton.addActionListener(e -> {
@@ -254,13 +212,7 @@ public class EditPanel extends JPanel {
             this.bufferedImage = bright(this.bufferedImage);
         });
 
-        this.mirrorSideButton = new JButton("<html>mirror<br>side");
-        this.mirrorSideButton.setFont(new Font("Arial", Font.BOLD, 20));
-        this.mirrorSideButton.setFocusPainted(false);
-        this.mirrorSideButton.setForeground(new Color(0x02EBC0));
-        this.mirrorSideButton.setBackground(new Color(231, 80, 6));
-        this.mirrorSideButton.setVisible(false);
-
+        this.mirrorSideButton = new SystemButton("<html>mirror<br>side", 20, true);
         this.add(this.mirrorSideButton);
 
         this.mirrorSideButton.addActionListener(e -> {// להוסיף buffered מקומי שישתנה
@@ -271,13 +223,7 @@ public class EditPanel extends JPanel {
         });
 
 
-        this.mirrorUpButton = new JButton("<html>mirror<br>up");
-        this.mirrorUpButton.setFont(new Font("Arial", Font.BOLD, 20));
-        this.mirrorUpButton.setFocusPainted(false);
-        this.mirrorUpButton.setForeground(new Color(0x02EBC0));
-        this.mirrorUpButton.setBackground(new Color(231, 80, 6));
-        this.mirrorUpButton.setVisible(false);
-
+        this.mirrorUpButton = new SystemButton("<html>mirror<br>up", 20, true);
         this.add(this.mirrorUpButton);
 
         this.mirrorUpButton.addActionListener(e -> {
@@ -336,7 +282,6 @@ public class EditPanel extends JPanel {
 
                 setDefaultPanel();
             }
-            this.setBackground(Color.yellow);
             this.setLayout(null);
             this.setVisible(false);
 
@@ -372,7 +317,7 @@ public class EditPanel extends JPanel {
 
     private void setMinimalPanelHeight() {
         this.setSize(bufferedImage.getWidth() + 200, minWindowHeight);
-        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 140, 130, 70);
+        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 100, 130, 70);
         this.labelPhoto = new JLabel(new ImageIcon(bufferedImage));
         this.labelPhoto.setBounds(100, 20, bufferedImage.getWidth(), bufferedImage.getHeight());
     }
@@ -436,26 +381,39 @@ public class EditPanel extends JPanel {
         return output;
     }
 
-    private BufferedImage dark(BufferedImage original) {
+    private BufferedImage smoothing(BufferedImage original) {
         BufferedImage output = deepCopy(original);
 
-        for (int x = 0; x < original.getWidth(); x++) {
-            for (int y = 0; y < original.getHeight(); y++) {
-                int argb = original.getRGB(x, y);
-                Color currentColor = new Color(argb, true);
+        int filterSize = 3;
+        int filterRadius = filterSize / 2;
 
-                if (currentColor.getAlpha() == 0) {
-                    output.setRGB(x, y, 0);
-                } else {
-                    int alpha = currentColor.getAlpha();
-                    int red = currentColor.getRed() + 20;
-                    int green = currentColor.getGreen() + 20;
-                    int blue = currentColor.getBlue() + 20;
-                    Color brightColor = new Color(red, green, blue, alpha);
-                    output.setRGB(x, y, brightColor.getRGB());
-//                    Color newColor = currentColor.darker();
-//                    output.setRGB(x, y, newColor.getRGB());
+        for (int x = filterRadius; x < original.getWidth() - filterRadius; x++) {
+            for (int y = filterRadius; y < original.getHeight() - filterRadius; y++) {
+                int redSum = 0, greenSum = 0, blueSum = 0, alphaSum = 0;
+                int pixelCount = 0;
+
+                // מעבר על הפיקסלים הסובבים
+                for (int i = -filterRadius; i <= filterRadius; i++) {
+                    for (int j = -filterRadius; j <= filterRadius; j++) {
+                        int rgb = original.getRGB(x + i, y + j);
+                        Color color = new Color(rgb, true);
+
+                        redSum += color.getRed();
+                        greenSum += color.getGreen();
+                        blueSum += color.getBlue();
+                        alphaSum += color.getAlpha();
+                        pixelCount++;
+                    }
                 }
+
+                // חישוב ממוצע הצבעים
+                int avgRed = redSum / pixelCount;
+                int avgGreen = greenSum / pixelCount;
+                int avgBlue = blueSum / pixelCount;
+                int avgAlpha = alphaSum / pixelCount;
+
+                Color newColor = new Color(avgRed, avgGreen, avgBlue, avgAlpha);
+                output.setRGB(x, y, newColor.getRGB());
             }
         }
 
@@ -463,6 +421,7 @@ public class EditPanel extends JPanel {
         this.repaint();
         return output;
     }
+
 
     private BufferedImage changeBrightness(BufferedImage image, int amount) {
         BufferedImage output = deepCopy(image);
@@ -534,7 +493,7 @@ public class EditPanel extends JPanel {
         this.nextButton.setVisible(false);
         this.mirrorSideButton.setVisible(false);
         this.mirrorUpButton.setVisible(false);
-        this.darkButton.setVisible(false);
+        this.smoothButton.setVisible(false);
         this.brightButton.setVisible(false);
 
         this.nextBufferedStack.clear();
@@ -566,12 +525,12 @@ public class EditPanel extends JPanel {
         this.mirrorSideButton.setBounds(whiteBlackButton.getX() + whiteBlackButton.getWidth() + 5, whiteBlackButton.getY(), whiteBlackButton.getWidth() - 35, whiteBlackButton.getHeight());
         this.mirrorUpButton.setVisible(true);
         this.mirrorUpButton.setBounds(mirrorSideButton.getX() + mirrorSideButton.getWidth() + 5, mirrorSideButton.getY(), mirrorSideButton.getWidth(), mirrorSideButton.getHeight());
-        this.darkButton.setVisible(true);
-        this.darkButton.setBounds(mirrorUpButton.getX() + mirrorUpButton.getWidth() + 5, mirrorUpButton.getY(), mirrorUpButton.getWidth() - 15, mirrorUpButton.getHeight());
+        this.smoothButton.setVisible(true);
+        this.smoothButton.setBounds(mirrorUpButton.getX() + mirrorUpButton.getWidth() + 5, mirrorUpButton.getY(), (int) (1.2 * mirrorUpButton.getWidth()), mirrorUpButton.getHeight());
 //        this.brightButton.setVisible(true);
-//        this.brightButton.setBounds(darkButton.getX() + darkButton.getWidth() + 5, darkButton.getY(), mirrorUpButton.getWidth(), darkButton.getHeight());
+//        this.brightButton.setBounds(smoothButton.getX() + smoothButton.getWidth() + 5, smoothButton.getY(), mirrorUpButton.getWidth(), smoothButton.getHeight());
         this.saveButton.setVisible(true);
-        this.saveButton.setBounds(darkButton.getX() + darkButton.getWidth() + 5, darkButton.getY(), (int) (1.7 * mirrorUpButton.getWidth()), darkButton.getHeight());
+        this.saveButton.setBounds(smoothButton.getX() + smoothButton.getWidth() + 5, smoothButton.getY(), (int) (1.2 * mirrorUpButton.getWidth()), smoothButton.getHeight());
 
 
         this.darkBrightSlider.setVisible(true);
@@ -597,7 +556,7 @@ public class EditPanel extends JPanel {
     private void saveImage() {
         // בוחר את המיקום שבו יישמר הקובץ
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Save Image");
+        fileChooser.setDialogTitle("Save");
         fileChooser.setAcceptAllFileFilterUsed(false);
         fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("PNG Images", "png"));
 
