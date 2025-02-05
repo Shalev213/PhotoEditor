@@ -384,7 +384,7 @@ public class EditPanel extends JPanel {
     private BufferedImage smoothing(BufferedImage original) {
         BufferedImage output = deepCopy(original);
 
-        int filterSize = 3;
+        int filterSize = 3; // size of checking is: filterSize X filterSize
         int filterRadius = filterSize / 2;
 
         for (int x = filterRadius; x < original.getWidth() - filterRadius; x++) {
