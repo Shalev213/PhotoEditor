@@ -16,15 +16,16 @@ import java.util.Stack;
 
 public class EditPanel extends JPanel {
     private final ImageIcon lobbyBackground;
+    private final int systemButtonsFontSize = 25;
     private int currentBrightnessChange = 0;
     private boolean[] changedValues;
-    private boolean isWBClicked = false;
+    private boolean isGSClicked = false;
     private boolean isDarkClicked = false;
     private String imagePath;
     private File fileImage;
     private SystemButton saveButton;
     private SystemButton returnButton;
-    private SystemButton whiteBlackButton;
+    private SystemButton grayScaleButton;
     private SystemButton smoothButton;
     private SystemButton brightButton;
     private SystemButton mirrorSideButton;
@@ -48,7 +49,11 @@ public class EditPanel extends JPanel {
     private JSlider darkBrightSlider;
     private BufferedImage originalImage;
     private BufferedImage bufferedImage1;
-
+    private int returnButtonWidth = 105;
+    private int returnButtonHeight = 50;
+    private int returnButtonX = 0;
+    private int currentHeight;
+    private int currentWidth;
 
     //  *********** add a shadow *********
     public EditPanel() {
@@ -83,7 +88,7 @@ public class EditPanel extends JPanel {
 //                    this.darkBrightSlider.setValue(previousValue);  // עדכון הערך ב-Slider
 //                }
 
-                isWBClicked = false;
+                isGSClicked = false;
                 this.repaint();
             }
 
@@ -118,6 +123,7 @@ public class EditPanel extends JPanel {
         this.setSize(800, 700);//setDefaultPanel()
 
         this.returnButton = new SystemButton("return", 30, false);
+        this.returnButton.setFont(new Font("Arial", Font.BOLD, this.systemButtonsFontSize));
 
         InputMap inputMap = returnButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = returnButton.getActionMap();
@@ -176,21 +182,21 @@ public class EditPanel extends JPanel {
         this.darkBrightSlider.setPaintLabels(true);
         this.add(darkBrightSlider);
 
-        this.whiteBlackButton = new SystemButton("<html>black<br>and white", 20, true);
-        this.add(this.whiteBlackButton);
+        this.grayScaleButton = new SystemButton("<html>gray<br>scale", 20, true);
+        this.add(this.grayScaleButton);
 
-        this.whiteBlackButton.addActionListener(e -> {
-            if (!isWBClicked) {
+        this.grayScaleButton.addActionListener(e -> {
+            if (!isGSClicked) {
                 this.nextBufferedStack.clear();
                 this.previousBufferedStack.push(this.bufferedImage);
-                this.bufferedImage = whiteBlack(this.bufferedImage);
-                isWBClicked = true;
+                this.bufferedImage = grayScale(this.bufferedImage);
+                isGSClicked = true;
             } else if (this.previousBufferedStack.empty()) {
-                isWBClicked = false;
+                isGSClicked = false;
             }
         });
 
-        this.saveButton = new SystemButton("Save", 20, false);
+        this.saveButton = new SystemButton("save", this.systemButtonsFontSize, false);
         this.saveButton.addActionListener(_ -> saveImage());
         this.add(this.saveButton);
 
@@ -302,36 +308,48 @@ public class EditPanel extends JPanel {
     }
 
     private void setMinimalPanelSize() {
+        this.currentWidth = this.minWindowWidth;
+        this.currentHeight = this.minWindowHeight;
         this.setSize(minWindowWidth, minWindowHeight);
-        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 200, 130, 70);
+        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 270, this.returnButtonWidth, this.returnButtonHeight);
         this.labelPhoto = new JLabel(new ImageIcon(bufferedImage));
         this.labelPhoto.setBounds((minWindowWidth - bufferedImage.getWidth()) / 2, 20, bufferedImage.getWidth(), bufferedImage.getHeight());
     }
 
     private void setPanelByImage() {
-        this.setSize(bufferedImage.getWidth() + 200, bufferedImage.getHeight() + 200);
-        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 20, 130, 70);
+        this.currentWidth = this.bufferedImage.getWidth() + 200;
+        this.currentHeight = this.bufferedImage.getHeight() + 200;
+        this.setSize(this.currentWidth, this.currentHeight);
+        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 90, this.returnButtonWidth, this.returnButtonHeight);
         this.labelPhoto = new JLabel(new ImageIcon(bufferedImage));
         this.labelPhoto.setBounds(93, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
     }
 
     private void setMinimalPanelHeight() {
-        this.setSize(bufferedImage.getWidth() + 200, minWindowHeight);
-        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 100, 130, 70);
+        this.currentWidth = this.bufferedImage.getWidth() + 200;
+        this.currentHeight = this.minWindowHeight;
+        this.setSize(this.currentWidth, this.currentHeight);
+        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 170, this.returnButtonWidth, this.returnButtonHeight);
         this.labelPhoto = new JLabel(new ImageIcon(bufferedImage));
         this.labelPhoto.setBounds(100, 20, bufferedImage.getWidth(), bufferedImage.getHeight());
     }
 
     private void setMinimalPanelWidth() {
-        this.setSize(minWindowWidth, bufferedImage.getHeight() + 200);
-        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 20, 130, 70);
+        this.currentWidth = this.minWindowWidth;
+        this.currentHeight = bufferedImage.getHeight() + 200;
+        this.setSize(this.currentWidth, this.currentHeight);
+        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 90, this.returnButtonWidth, this.returnButtonHeight);
+
+//        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 90, this.returnButtonWidth, this.returnButtonHeight);
         this.labelPhoto = new JLabel(new ImageIcon(bufferedImage));
         this.labelPhoto.setBounds((minWindowWidth - bufferedImage.getWidth()) / 2, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
     }
 
     public void setDefaultPanel() {
-        this.setSize(800, 650);
-        this.returnButton.setBounds(10, 470, 130, 70);
+        this.currentWidth = 800;
+        this.currentHeight = 650;
+        this.setSize(this.currentWidth, this.currentHeight);
+        this.returnButton.setBounds(10, 540, this.returnButtonWidth, this.returnButtonHeight);
 
         if (fileImage.exists()) { // ***** add a correct label *****
             System.out.println("Too big photo");
@@ -342,7 +360,7 @@ public class EditPanel extends JPanel {
         }
     }
 
-    private BufferedImage whiteBlack(BufferedImage original) {
+    private BufferedImage grayScale(BufferedImage original) {
         BufferedImage output = deepCopy(original);
 
         for (int x = 0; x < original.getWidth(); x++) {
@@ -482,13 +500,13 @@ public class EditPanel extends JPanel {
     }
 
     public void setIsWBClicked(boolean isWBClicked) {
-        this.isWBClicked = isWBClicked;
+        this.isGSClicked = isWBClicked;
     }
 
     public void resetAll() {
-        this.isWBClicked = false;
+        this.isGSClicked = false;
         this.returnButton.setVisible(false);
-        this.whiteBlackButton.setVisible(false);
+        this.grayScaleButton.setVisible(false);
         this.previousButton.setVisible(false);
         this.nextButton.setVisible(false);
         this.mirrorSideButton.setVisible(false);
@@ -519,14 +537,16 @@ public class EditPanel extends JPanel {
         this.nextButton.setBounds(this.getWidth() - 95, 10, 70, 70);
         this.previousButton.setVisible(true);
         this.previousButton.setBounds(10, 10, 70, 70);
-        this.whiteBlackButton.setVisible(true);
-        this.whiteBlackButton.setBounds(returnButton.getX() + returnButton.getWidth() + 5, returnButton.getY(), returnButton.getWidth(), returnButton.getHeight());
+        this.grayScaleButton.setVisible(true);
+//        this.grayScaleButton.setBounds(returnButton.getX() + returnButton.getWidth() + 5, returnButton.getY(), (int) (returnButton.getWidth() * 0.7), returnButton.getHeight());
+        this.grayScaleButton.setBounds(returnButton.getX(), returnButton.getY() - 80, (int) (returnButton.getWidth() * 0.8), returnButton.getHeight());
+
         this.mirrorSideButton.setVisible(true);
-        this.mirrorSideButton.setBounds(whiteBlackButton.getX() + whiteBlackButton.getWidth() + 5, whiteBlackButton.getY(), whiteBlackButton.getWidth() - 35, whiteBlackButton.getHeight());
+        this.mirrorSideButton.setBounds(grayScaleButton.getX() + grayScaleButton.getWidth() + 5, grayScaleButton.getY(), grayScaleButton.getWidth(), grayScaleButton.getHeight());
         this.mirrorUpButton.setVisible(true);
         this.mirrorUpButton.setBounds(mirrorSideButton.getX() + mirrorSideButton.getWidth() + 5, mirrorSideButton.getY(), mirrorSideButton.getWidth(), mirrorSideButton.getHeight());
         this.smoothButton.setVisible(true);
-        this.smoothButton.setBounds(mirrorUpButton.getX() + mirrorUpButton.getWidth() + 5, mirrorUpButton.getY(), (int) (1.2 * mirrorUpButton.getWidth()), mirrorUpButton.getHeight());
+        this.smoothButton.setBounds(mirrorUpButton.getX() + mirrorUpButton.getWidth() + 5, mirrorUpButton.getY(), returnButton.getWidth(), mirrorUpButton.getHeight());
 //        this.brightButton.setVisible(true);
 //        this.brightButton.setBounds(smoothButton.getX() + smoothButton.getWidth() + 5, smoothButton.getY(), mirrorUpButton.getWidth(), smoothButton.getHeight());
         this.saveButton.setVisible(true);
@@ -534,8 +554,8 @@ public class EditPanel extends JPanel {
 
 
         this.darkBrightSlider.setVisible(true);
-        this.darkBrightSlider.setSize(returnButton.getWidth() + 270, returnButton.getHeight() - 20);
-        this.darkBrightSlider.setLocation((this.getWidth() - darkBrightSlider.getWidth()) / 2, returnButton.getY() + returnButton.getHeight() + 10);
+        this.darkBrightSlider.setSize(returnButton.getWidth() + 270, returnButton.getHeight());
+        this.darkBrightSlider.setLocation((this.getWidth() - darkBrightSlider.getWidth()) / 2, grayScaleButton.getY() + grayScaleButton.getHeight() + 10);
 //        this.darkBrightSlider.setBounds((this.getWidth() - darkBrightSlider.getWidth()) / 4 , returnButton.getY() + returnButton.getHeight() + 10, returnButton.getWidth() + 270, returnButton.getHeight() - 20);
     }
 
