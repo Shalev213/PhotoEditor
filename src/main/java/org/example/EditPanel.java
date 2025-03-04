@@ -26,7 +26,8 @@ public class EditPanel extends JPanel {
     private SystemButton saveButton;
     private SystemButton returnButton;
     private SystemButton grayScaleButton;
-    private SystemButton smoothButton;
+    private SystemButton averageSmoothingButton;
+    private SystemButton GaussianSmoothingButton;
     private SystemButton brightButton;
     private SystemButton mirrorSideButton;
     private SystemButton mirrorUpButton;
@@ -200,13 +201,22 @@ public class EditPanel extends JPanel {
         this.saveButton.addActionListener(_ -> saveImage());
         this.add(this.saveButton);
 
-        this.smoothButton = new SystemButton("smooth", 20, true);
-        this.add(this.smoothButton);
+        this.averageSmoothingButton = new SystemButton("<html>average<br>smoothing", 20, true);
+        this.add(this.averageSmoothingButton);
 
-        this.smoothButton.addActionListener(_ -> {
+        this.averageSmoothingButton.addActionListener(_ -> {
             this.nextBufferedStack.clear();
             this.previousBufferedStack.push(this.bufferedImage);
-            this.bufferedImage = smoothing(this.bufferedImage);
+            this.bufferedImage = averageSmoothing(this.bufferedImage);
+        });
+
+        this.GaussianSmoothingButton = new SystemButton("<html>Gaussian<br>smoothing", 20, true);
+        this.add(this.GaussianSmoothingButton);
+
+        this.GaussianSmoothingButton.addActionListener(_ -> {
+            this.nextBufferedStack.clear();
+            this.previousBufferedStack.push(this.bufferedImage);
+            this.bufferedImage = GaussianSmoothing(this.bufferedImage);
         });
 
         this.brightButton = new SystemButton("bright", 20, true);
@@ -322,7 +332,7 @@ public class EditPanel extends JPanel {
         this.currentWidth = this.bufferedImage.getWidth() + 200;
         this.currentHeight = this.bufferedImage.getHeight() + 200;
         this.setSize(this.currentWidth, this.currentHeight);
-        this.returnButton.setBounds(this.returnButtonX, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 90, this.returnButtonWidth, this.returnButtonHeight);
+        this.returnButton.setBounds(this.returnButtonX, this.currentHeight - this.returnButtonHeight - 50, this.returnButtonWidth, this.returnButtonHeight);
         this.labelPhoto = new JLabel(new ImageIcon(bufferedImage));
         this.labelPhoto.setBounds(93, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
     }
@@ -331,7 +341,7 @@ public class EditPanel extends JPanel {
         this.currentWidth = this.bufferedImage.getWidth() + 200;
         this.currentHeight = this.minWindowHeight;
         this.setSize(this.currentWidth, this.currentHeight);
-        this.returnButton.setBounds(this.returnButtonX, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 170, this.returnButtonWidth, this.returnButtonHeight);
+        this.returnButton.setBounds(this.returnButtonX, this.currentHeight - this.returnButtonHeight - 50, this.returnButtonWidth, this.returnButtonHeight);
         this.labelPhoto = new JLabel(new ImageIcon(bufferedImage));
         this.labelPhoto.setBounds(100, 20, bufferedImage.getWidth(), bufferedImage.getHeight());
     }
@@ -340,7 +350,7 @@ public class EditPanel extends JPanel {
         this.currentWidth = this.minWindowWidth;
         this.currentHeight = bufferedImage.getHeight() + 200;
         this.setSize(this.currentWidth, this.currentHeight);
-        this.returnButton.setBounds(this.returnButtonX, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 90, this.returnButtonWidth, this.returnButtonHeight);
+        this.returnButton.setBounds(this.returnButtonX, this.currentHeight - this.returnButtonHeight - 50, this.returnButtonWidth, this.returnButtonHeight);
 
 //        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 90, this.returnButtonWidth, this.returnButtonHeight);
         this.labelPhoto = new JLabel(new ImageIcon(bufferedImage));
@@ -351,7 +361,7 @@ public class EditPanel extends JPanel {
         this.currentWidth = 800;
         this.currentHeight = 650;
         this.setSize(this.currentWidth, this.currentHeight);
-        this.returnButton.setBounds(this.returnButtonX, 540, this.returnButtonWidth, this.returnButtonHeight);
+        this.returnButton.setBounds(this.returnButtonX, this.currentHeight - this.returnButtonHeight - 50, this.returnButtonWidth, this.returnButtonHeight);
 
         if (fileImage.exists()) { // ***** add a correct label *****
             System.out.println("Too big photo");
@@ -401,7 +411,47 @@ public class EditPanel extends JPanel {
         return output;
     }
 
-    private BufferedImage smoothing(BufferedImage original) {
+    private BufferedImage averageSmoothing(BufferedImage original) {
+        BufferedImage output = deepCopy(original);
+
+        int filterSize = 3; // size of checking is: filterSize X filterSize
+        int filterRadius = filterSize / 2;
+
+        for (int x = filterRadius; x < original.getWidth() - filterRadius; x++) {
+            for (int y = filterRadius; y < original.getHeight() - filterRadius; y++) {
+                int redSum = 0, greenSum = 0, blueSum = 0, alphaSum = 0;
+                int pixelCount = 0;
+
+                // מעבר על הפיקסלים הסובבים
+                for (int i = -filterRadius; i <= filterRadius; i++) {
+                    for (int j = -filterRadius; j <= filterRadius; j++) {
+                        int rgb = original.getRGB(x + i, y + j);
+                        Color color = new Color(rgb, true);
+
+                        redSum += color.getRed();
+                        greenSum += color.getGreen();
+                        blueSum += color.getBlue();
+                        alphaSum += color.getAlpha();
+                        pixelCount++;
+                    }
+                }
+
+                // חישוב ממוצע הצבעים
+                int avgRed = redSum / pixelCount;
+                int avgGreen = greenSum / pixelCount;
+                int avgBlue = blueSum / pixelCount;
+                int avgAlpha = alphaSum / pixelCount;
+
+                Color newColor = new Color(avgRed, avgGreen, avgBlue, avgAlpha);
+                output.setRGB(x, y, newColor.getRGB());
+            }
+        }
+        labelPhoto.setIcon(new ImageIcon(output));
+        this.repaint();
+        return output;
+    }
+
+    private BufferedImage GaussianSmoothing(BufferedImage original) {
         BufferedImage output = deepCopy(original);
 
         int filterSize = 3; // size of checking is: filterSize X filterSize
@@ -513,7 +563,8 @@ public class EditPanel extends JPanel {
         this.nextButton.setVisible(false);
         this.mirrorSideButton.setVisible(false);
         this.mirrorUpButton.setVisible(false);
-        this.smoothButton.setVisible(false);
+        this.averageSmoothingButton.setVisible(false);
+        this.GaussianSmoothingButton.setVisible(false);
         this.brightButton.setVisible(false);
         this.saveButton.setVisible(false);
         this.darkBrightSlider.setVisible(false);
@@ -549,12 +600,15 @@ public class EditPanel extends JPanel {
         this.mirrorSideButton.setBounds(grayScaleButton.getX() + grayScaleButton.getWidth() + 5, grayScaleButton.getY(), grayScaleButton.getWidth(), grayScaleButton.getHeight());
         this.mirrorUpButton.setVisible(true);
         this.mirrorUpButton.setBounds(mirrorSideButton.getX() + mirrorSideButton.getWidth() + 5, mirrorSideButton.getY(), mirrorSideButton.getWidth(), mirrorSideButton.getHeight());
-        this.smoothButton.setVisible(true);
-        this.smoothButton.setBounds(mirrorUpButton.getX() + mirrorUpButton.getWidth() + 5, mirrorUpButton.getY(), returnButton.getWidth(), mirrorUpButton.getHeight());
+        this.averageSmoothingButton.setVisible(true);
+        this.averageSmoothingButton.setBounds(mirrorUpButton.getX() + mirrorUpButton.getWidth() + 5, mirrorUpButton.getY(), (int) (returnButton.getWidth() * 1.2), mirrorUpButton.getHeight());
+        this.GaussianSmoothingButton.setVisible(true);
+        this.GaussianSmoothingButton.setBounds(averageSmoothingButton.getX() + averageSmoothingButton.getWidth() + 5, averageSmoothingButton.getY(), (int) (returnButton.getWidth() * 1.2), averageSmoothingButton.getHeight());
+
 //        this.brightButton.setVisible(true);
 //        this.brightButton.setBounds(smoothButton.getX() + smoothButton.getWidth() + 5, smoothButton.getY(), mirrorUpButton.getWidth(), smoothButton.getHeight());
         this.saveButton.setVisible(true);
-        this.saveButton.setBounds(smoothButton.getX() + smoothButton.getWidth() + 5, returnButton.getY(), (int) (1.2 * mirrorUpButton.getWidth()), smoothButton.getHeight());
+        this.saveButton.setBounds(this.getWidth() - this.returnButtonWidth - 30, this.returnButton.getY(), this.returnButtonWidth, averageSmoothingButton.getHeight());
 
 
         this.darkBrightSlider.setVisible(true);
