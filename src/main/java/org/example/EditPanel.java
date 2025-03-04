@@ -51,7 +51,7 @@ public class EditPanel extends JPanel {
     private BufferedImage bufferedImage1;
     private int returnButtonWidth = 105;
     private int returnButtonHeight = 50;
-    private int returnButtonX = 0;
+    private int returnButtonX = 15;
     private int currentHeight;
     private int currentWidth;
 
@@ -310,8 +310,10 @@ public class EditPanel extends JPanel {
     private void setMinimalPanelSize() {
         this.currentWidth = this.minWindowWidth;
         this.currentHeight = this.minWindowHeight;
-        this.setSize(minWindowWidth, minWindowHeight);
-        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 270, this.returnButtonWidth, this.returnButtonHeight);
+        this.setSize(this.currentWidth, this.currentHeight);
+//        this.returnButton.setBounds(this.returnButtonX, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 270, this.returnButtonWidth, this.returnButtonHeight);
+        this.returnButton.setBounds(this.returnButtonX, this.currentHeight - this.returnButtonHeight - 50, this.returnButtonWidth, this.returnButtonHeight);
+
         this.labelPhoto = new JLabel(new ImageIcon(bufferedImage));
         this.labelPhoto.setBounds((minWindowWidth - bufferedImage.getWidth()) / 2, 20, bufferedImage.getWidth(), bufferedImage.getHeight());
     }
@@ -320,7 +322,7 @@ public class EditPanel extends JPanel {
         this.currentWidth = this.bufferedImage.getWidth() + 200;
         this.currentHeight = this.bufferedImage.getHeight() + 200;
         this.setSize(this.currentWidth, this.currentHeight);
-        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 90, this.returnButtonWidth, this.returnButtonHeight);
+        this.returnButton.setBounds(this.returnButtonX, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 90, this.returnButtonWidth, this.returnButtonHeight);
         this.labelPhoto = new JLabel(new ImageIcon(bufferedImage));
         this.labelPhoto.setBounds(93, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
     }
@@ -329,7 +331,7 @@ public class EditPanel extends JPanel {
         this.currentWidth = this.bufferedImage.getWidth() + 200;
         this.currentHeight = this.minWindowHeight;
         this.setSize(this.currentWidth, this.currentHeight);
-        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 170, this.returnButtonWidth, this.returnButtonHeight);
+        this.returnButton.setBounds(this.returnButtonX, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 170, this.returnButtonWidth, this.returnButtonHeight);
         this.labelPhoto = new JLabel(new ImageIcon(bufferedImage));
         this.labelPhoto.setBounds(100, 20, bufferedImage.getWidth(), bufferedImage.getHeight());
     }
@@ -338,7 +340,7 @@ public class EditPanel extends JPanel {
         this.currentWidth = this.minWindowWidth;
         this.currentHeight = bufferedImage.getHeight() + 200;
         this.setSize(this.currentWidth, this.currentHeight);
-        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 90, this.returnButtonWidth, this.returnButtonHeight);
+        this.returnButton.setBounds(this.returnButtonX, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 90, this.returnButtonWidth, this.returnButtonHeight);
 
 //        this.returnButton.setBounds(20, bufferedImage.getNumYTiles() + bufferedImage.getHeight() + 90, this.returnButtonWidth, this.returnButtonHeight);
         this.labelPhoto = new JLabel(new ImageIcon(bufferedImage));
@@ -349,7 +351,7 @@ public class EditPanel extends JPanel {
         this.currentWidth = 800;
         this.currentHeight = 650;
         this.setSize(this.currentWidth, this.currentHeight);
-        this.returnButton.setBounds(10, 540, this.returnButtonWidth, this.returnButtonHeight);
+        this.returnButton.setBounds(this.returnButtonX, 540, this.returnButtonWidth, this.returnButtonHeight);
 
         if (fileImage.exists()) { // ***** add a correct label *****
             System.out.println("Too big photo");
@@ -513,6 +515,8 @@ public class EditPanel extends JPanel {
         this.mirrorUpButton.setVisible(false);
         this.smoothButton.setVisible(false);
         this.brightButton.setVisible(false);
+        this.saveButton.setVisible(false);
+        this.darkBrightSlider.setVisible(false);
 
         this.nextBufferedStack.clear();
         this.previousBufferedStack.clear();
@@ -550,7 +554,7 @@ public class EditPanel extends JPanel {
 //        this.brightButton.setVisible(true);
 //        this.brightButton.setBounds(smoothButton.getX() + smoothButton.getWidth() + 5, smoothButton.getY(), mirrorUpButton.getWidth(), smoothButton.getHeight());
         this.saveButton.setVisible(true);
-        this.saveButton.setBounds(smoothButton.getX() + smoothButton.getWidth() + 5, smoothButton.getY(), (int) (1.2 * mirrorUpButton.getWidth()), smoothButton.getHeight());
+        this.saveButton.setBounds(smoothButton.getX() + smoothButton.getWidth() + 5, returnButton.getY(), (int) (1.2 * mirrorUpButton.getWidth()), smoothButton.getHeight());
 
 
         this.darkBrightSlider.setVisible(true);
