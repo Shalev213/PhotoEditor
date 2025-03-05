@@ -457,39 +457,67 @@ public class EditPanel extends JPanel {
         int filterSize = 3; // size of checking is: filterSize X filterSize
         int filterRadius = filterSize / 2;
 
+        double sigma = filterRadius / 2.0;  // סטיית תקן של המסנן הגאוסיאני
+        double[][] gaussianKernel = createGaussianKernel(filterRadius, sigma);
+
         for (int x = filterRadius; x < original.getWidth() - filterRadius; x++) {
             for (int y = filterRadius; y < original.getHeight() - filterRadius; y++) {
-                int redSum = 0, greenSum = 0, blueSum = 0, alphaSum = 0;
-                int pixelCount = 0;
+                double redSum = 0, greenSum = 0, blueSum = 0, alphaSum = 0;
+                double weightSum = 0.0;
 
-                // מעבר על הפיקסלים הסובבים
+
+// לולאת הסינון הגאוסיאני
                 for (int i = -filterRadius; i <= filterRadius; i++) {
                     for (int j = -filterRadius; j <= filterRadius; j++) {
                         int rgb = original.getRGB(x + i, y + j);
                         Color color = new Color(rgb, true);
 
-                        redSum += color.getRed();
-                        greenSum += color.getGreen();
-                        blueSum += color.getBlue();
-                        alphaSum += color.getAlpha();
-                        pixelCount++;
+                        double weight = gaussianKernel[i + filterRadius][j + filterRadius];
+
+                        redSum += color.getRed() * weight;
+                        greenSum += color.getGreen() * weight;
+                        blueSum += color.getBlue() * weight;
+                        alphaSum += color.getAlpha() * weight;
+                        weightSum += weight;
                     }
                 }
 
-                // חישוב ממוצע הצבעים
-                int avgRed = redSum / pixelCount;
-                int avgGreen = greenSum / pixelCount;
-                int avgBlue = blueSum / pixelCount;
-                int avgAlpha = alphaSum / pixelCount;
+// חישוב הצבע הסופי לאחר שקלול
+                int red = (int) Math.round(redSum / weightSum);
+                int green = (int) Math.round(greenSum / weightSum);
+                int blue = (int) Math.round(blueSum / weightSum);
+                int alpha = (int) Math.round(alphaSum / weightSum);
 
-                Color newColor = new Color(avgRed, avgGreen, avgBlue, avgAlpha);
-                output.setRGB(x, y, newColor.getRGB());
+                Color blurredColor = new Color(red, green, blue, alpha);
+                output.setRGB(x, y, blurredColor.getRGB());
             }
         }
 
         labelPhoto.setIcon(new ImageIcon(output));
         this.repaint();
         return output;
+    }
+    private static double[][] createGaussianKernel(int radius, double sigma) {
+        int size = 2 * radius + 1;
+        double[][] kernel = new double[size][size];
+        double sum = 0.0;
+
+        for (int i = -radius; i <= radius; i++) {
+            for (int j = -radius; j <= radius; j++) {
+                double exponent = -(i * i + j * j) / (2 * sigma * sigma);
+                kernel[i + radius][j + radius] = Math.exp(exponent);
+                sum += kernel[i + radius][j + radius];
+            }
+        }
+
+        // נורמליזציה כך שסכום המשקולות יהיה 1
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                kernel[i][j] /= sum;
+            }
+        }
+
+        return kernel;
     }
 
 
