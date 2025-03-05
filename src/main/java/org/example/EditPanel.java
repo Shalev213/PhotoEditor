@@ -372,6 +372,33 @@ public class EditPanel extends JPanel {
         }
     }
 
+    private BufferedImage negative(BufferedImage original) {
+        BufferedImage output = deepCopy(original);
+
+        for (int x = 0; x < original.getWidth(); x++) {
+            for (int y = 0; y < original.getHeight(); y++) {
+                int argb = original.getRGB(x, y);
+                Color currentColor = new Color(argb, true);
+
+                if (currentColor.getAlpha() == 0) {
+                    output.setRGB(x, y, 0);
+                } else {
+                    int alpha = 255 - currentColor.getAlpha();
+                    int red = 255 - currentColor.getRed();
+                    int green = 255 - currentColor.getGreen();
+                    int blue = 255 - currentColor.getBlue();
+
+                    Color updateColor = new Color(red, green, blue, alpha);
+                    output.setRGB(x, y, updateColor.getRGB());
+                }
+            }
+        }
+
+        labelPhoto.setIcon(new ImageIcon(output));
+        this.repaint();
+        return output;
+    }
+
     private BufferedImage grayScale(BufferedImage original) {
         BufferedImage output = deepCopy(original);
 
@@ -465,7 +492,6 @@ public class EditPanel extends JPanel {
                 double redSum = 0, greenSum = 0, blueSum = 0, alphaSum = 0;
                 double weightSum = 0.0;
 
-
 // לולאת הסינון הגאוסיאני
                 for (int i = -filterRadius; i <= filterRadius; i++) {
                     for (int j = -filterRadius; j <= filterRadius; j++) {
@@ -497,6 +523,7 @@ public class EditPanel extends JPanel {
         this.repaint();
         return output;
     }
+
     private static double[][] createGaussianKernel(int radius, double sigma) {
         int size = 2 * radius + 1;
         double[][] kernel = new double[size][size];
