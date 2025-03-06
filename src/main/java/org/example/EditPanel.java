@@ -277,7 +277,6 @@ public class EditPanel extends JPanel {
         }
     }
 
-
     public void setPhoto(String myUrl) {
 
         try {
