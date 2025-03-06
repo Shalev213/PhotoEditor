@@ -29,6 +29,7 @@ public class EditPanel extends JPanel {
     private SystemButton averageSmoothingButton;
     private SystemButton GaussianSmoothingButton;
     private SystemButton negativeButton;
+    private SystemButton sideGlitchButton;
     private SystemButton brightButton;
     private SystemButton mirrorSideButton;
     private SystemButton mirrorUpButton;
@@ -244,7 +245,7 @@ public class EditPanel extends JPanel {
         this.mirrorSideButton.addActionListener(e -> {// להוסיף buffered מקומי שישתנה
             this.nextBufferedStack.clear();
             this.previousBufferedStack.push(this.bufferedImage);
-            this.bufferedImage = deepCopy(mirrorSide(this.bufferedImage));
+            this.bufferedImage = deepCopy(SideMirror(this.bufferedImage));
             updateImageWithCurrentBrightness();
         });
 
@@ -255,7 +256,17 @@ public class EditPanel extends JPanel {
         this.mirrorUpButton.addActionListener(e -> {
             this.nextBufferedStack.clear();
             this.previousBufferedStack.push(this.bufferedImage);
-            this.bufferedImage = mirrorUp(this.bufferedImage);
+            this.bufferedImage = upMirror(this.bufferedImage);
+            updateImageWithCurrentBrightness();
+        });
+
+        this.sideGlitchButton = new SystemButton("<html>side<br>glitch", 20, true);
+        this.add(this.sideGlitchButton);
+
+        this.sideGlitchButton.addActionListener(e -> {// להוסיף buffered מקומי שישתנה
+            this.nextBufferedStack.clear();
+            this.previousBufferedStack.push(this.bufferedImage);
+            this.bufferedImage = deepCopy(sideGlitch(this.bufferedImage));
             updateImageWithCurrentBrightness();
         });
     }
@@ -436,7 +447,21 @@ public class EditPanel extends JPanel {
         return output;
     }
 
-    public BufferedImage mirrorSide(BufferedImage original) {
+    public BufferedImage upMirror(BufferedImage original) {
+        BufferedImage output = deepCopy(original);
+        for (int x = 0; x < original.getWidth(); x++) {
+            for (int y = 0; y < original.getHeight(); y++) {
+                output.setRGB(x, y, original.getRGB(x, original.getHeight() - y - 1));
+            }
+        }
+        this.originalImage = deepCopy(bufferedImage);
+
+        labelPhoto.setIcon(new ImageIcon(output));
+        this.repaint();
+        return output;
+    }
+
+    public BufferedImage SideMirror(BufferedImage original) {
         BufferedImage output = deepCopy(original);
         for (int x = 0; x < original.getWidth(); x++) {
             for (int y = 0; y < original.getHeight(); y++) {
@@ -448,14 +473,14 @@ public class EditPanel extends JPanel {
         return output;
     }
 
-    public BufferedImage glitch(BufferedImage original) {
+    public BufferedImage sideGlitch(BufferedImage original) {
         BufferedImage output = deepCopy(original);
         int moves = 1;
         for (int x = moves; x < original.getWidth() - moves; x++) {
             for (int y = 0; y < original.getHeight(); y++) {
                 if ((y / moves) % 2 == 0) {
                     output.setRGB(x, y, original.getRGB(x - moves, y));
-                }else {
+                } else {
                     output.setRGB(x, y, original.getRGB(x + moves, y));
                 }
             }
@@ -619,20 +644,6 @@ public class EditPanel extends JPanel {
         return output;
     }
 
-    public BufferedImage mirrorUp(BufferedImage original) {
-        BufferedImage output = deepCopy(original);
-        for (int x = 0; x < original.getWidth(); x++) {
-            for (int y = 0; y < original.getHeight(); y++) {
-                output.setRGB(x, y, original.getRGB(x, original.getHeight() - y - 1));
-            }
-        }
-        this.originalImage = deepCopy(bufferedImage);
-
-        labelPhoto.setIcon(new ImageIcon(output));
-        this.repaint();
-        return output;
-    }
-
     public void setIsWBClicked(boolean isWBClicked) {
         this.isGSClicked = isWBClicked;
     }
@@ -648,6 +659,8 @@ public class EditPanel extends JPanel {
         this.averageSmoothingButton.setVisible(false);
         this.GaussianSmoothingButton.setVisible(false);
         this.negativeButton.setVisible(false);
+        this.sideGlitchButton.setVisible(false);
+
         this.brightButton.setVisible(false);
         this.saveButton.setVisible(false);
         this.darkBrightSlider.setVisible(false);
@@ -689,6 +702,8 @@ public class EditPanel extends JPanel {
         this.GaussianSmoothingButton.setBounds(averageSmoothingButton.getX() + averageSmoothingButton.getWidth() + 5, averageSmoothingButton.getY(), (int) (returnButton.getWidth() * 0.6), averageSmoothingButton.getHeight());
         this.negativeButton.setVisible(true);
         this.negativeButton.setBounds(GaussianSmoothingButton.getX() + GaussianSmoothingButton.getWidth() + 5, GaussianSmoothingButton.getY(), (int) (returnButton.getWidth() * 0.68), GaussianSmoothingButton.getHeight());
+        this.sideGlitchButton.setVisible(true);
+        this.sideGlitchButton.setBounds(negativeButton.getX() + negativeButton.getWidth() + 5, negativeButton.getY(), (int) (returnButton.getWidth() * 0.8), negativeButton.getHeight());
 
 //        this.brightButton.setVisible(true);
 //        this.brightButton.setBounds(smoothButton.getX() + smoothButton.getWidth() + 5, smoothButton.getY(), mirrorUpButton.getWidth(), smoothButton.getHeight());
