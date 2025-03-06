@@ -30,6 +30,7 @@ public class EditPanel extends JPanel {
     private SystemButton GaussianSmoothingButton;
     private SystemButton negativeButton;
     private SystemButton sideGlitchButton;
+    private SystemButton threeDimensionalEffectButton;
     private SystemButton brightButton;
     private SystemButton mirrorSideButton;
     private SystemButton mirrorUpButton;
@@ -245,7 +246,7 @@ public class EditPanel extends JPanel {
         this.mirrorSideButton.addActionListener(e -> {// להוסיף buffered מקומי שישתנה
             this.nextBufferedStack.clear();
             this.previousBufferedStack.push(this.bufferedImage);
-            this.bufferedImage = deepCopy(SideMirror(this.bufferedImage));
+            this.bufferedImage = deepCopy(sideMirror(this.bufferedImage));
             updateImageWithCurrentBrightness();
         });
 
@@ -267,6 +268,16 @@ public class EditPanel extends JPanel {
             this.nextBufferedStack.clear();
             this.previousBufferedStack.push(this.bufferedImage);
             this.bufferedImage = deepCopy(sideGlitch(this.bufferedImage));
+            updateImageWithCurrentBrightness();
+        });
+
+        this.threeDimensionalEffectButton = new SystemButton("3D", 20, true);
+        this.add(this.threeDimensionalEffectButton);
+
+        this.threeDimensionalEffectButton.addActionListener(e -> {// להוסיף buffered מקומי שישתנה
+            this.nextBufferedStack.clear();
+            this.previousBufferedStack.push(this.bufferedImage);
+            this.bufferedImage = deepCopy(threeDimensionalEffect(this.bufferedImage, 10));
             updateImageWithCurrentBrightness();
         });
     }
@@ -403,13 +414,13 @@ public class EditPanel extends JPanel {
 //                if (currentColor.getAlpha() == 0) {
 //                    output.setRGB(x, y, 0);
 //                } else {
-                    int alpha = currentColor.getAlpha();
-                    int red = 255 - currentColor.getRed();
-                    int green = 255 - currentColor.getGreen();
-                    int blue = 255 - currentColor.getBlue();
+                int alpha = currentColor.getAlpha();
+                int red = 255 - currentColor.getRed();
+                int green = 255 - currentColor.getGreen();
+                int blue = 255 - currentColor.getBlue();
 
-                    Color updateColor = new Color(red, green, blue, alpha);
-                    output.setRGB(x, y, updateColor.getRGB());
+                Color updateColor = new Color(red, green, blue, alpha);
+                output.setRGB(x, y, updateColor.getRGB());
 //                }
             }
         }
@@ -460,7 +471,7 @@ public class EditPanel extends JPanel {
         return output;
     }
 
-    public BufferedImage SideMirror(BufferedImage original) {
+    public BufferedImage sideMirror(BufferedImage original) {
         BufferedImage output = deepCopy(original);
         for (int x = 0; x < original.getWidth(); x++) {
             for (int y = 0; y < original.getHeight(); y++) {
@@ -470,6 +481,32 @@ public class EditPanel extends JPanel {
         labelPhoto.setIcon(new ImageIcon(output));
         this.repaint();
         return output;
+    }
+
+    public BufferedImage threeDimensionalEffect(BufferedImage image, int shift) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int originalRGB = image.getRGB(x, y);
+                Color originalColor = new Color(originalRGB);
+
+//                int red = originalColor.getRed();
+                int green = originalColor.getGreen();
+//                int blue = originalColor.getBlue();
+
+
+                int newRed = (x - shift >= 0) ? new Color(image.getRGB(x - shift, y)).getRed() : 0;
+                int newBlue = (x + shift < width) ? new Color(image.getRGB(x + shift, y)).getBlue() : 0;
+                int newGreen = (green / 2);
+
+                Color newColor = new Color(newRed, newGreen, newBlue);
+                result.setRGB(x, y, newColor.getRGB());
+            }
+        }
+        return result;
     }
 
     public BufferedImage sideGlitch(BufferedImage original) {
@@ -489,7 +526,7 @@ public class EditPanel extends JPanel {
         return output;
     }
 
-//     public BufferedImage anotherSideGlitch(BufferedImage original) {
+    //     public BufferedImage anotherSideGlitch(BufferedImage original) {
 //        BufferedImage output = deepCopy(original);
 //        int moves = 10;
 //        for (int x = moves; x < original.getWidth() - moves; x++) {
@@ -677,6 +714,8 @@ public class EditPanel extends JPanel {
         this.GaussianSmoothingButton.setVisible(false);
         this.negativeButton.setVisible(false);
         this.sideGlitchButton.setVisible(false);
+        this.threeDimensionalEffectButton.setVisible(false);
+
 
         this.brightButton.setVisible(false);
         this.saveButton.setVisible(false);
@@ -721,6 +760,8 @@ public class EditPanel extends JPanel {
         this.negativeButton.setBounds(GaussianSmoothingButton.getX() + GaussianSmoothingButton.getWidth() + 5, GaussianSmoothingButton.getY(), (int) (returnButton.getWidth() * 0.68), GaussianSmoothingButton.getHeight());
         this.sideGlitchButton.setVisible(true);
         this.sideGlitchButton.setBounds(negativeButton.getX() + negativeButton.getWidth() + 5, negativeButton.getY(), (int) (returnButton.getWidth() * 0.8), negativeButton.getHeight());
+        this.threeDimensionalEffectButton.setVisible(true);
+        this.threeDimensionalEffectButton.setBounds(sideGlitchButton.getX() + sideGlitchButton.getWidth() + 5, sideGlitchButton.getY(), (int) (returnButton.getWidth() * 0.6), sideGlitchButton.getHeight());
 
 //        this.brightButton.setVisible(true);
 //        this.brightButton.setBounds(smoothButton.getX() + smoothButton.getWidth() + 5, smoothButton.getY(), mirrorUpButton.getWidth(), smoothButton.getHeight());
