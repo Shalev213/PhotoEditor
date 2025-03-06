@@ -28,6 +28,7 @@ public class EditPanel extends JPanel {
     private SystemButton grayScaleButton;
     private SystemButton averageSmoothingButton;
     private SystemButton GaussianSmoothingButton;
+    private SystemButton negativeButton;
     private SystemButton brightButton;
     private SystemButton mirrorSideButton;
     private SystemButton mirrorUpButton;
@@ -201,7 +202,7 @@ public class EditPanel extends JPanel {
         this.saveButton.addActionListener(_ -> saveImage());
         this.add(this.saveButton);
 
-        this.averageSmoothingButton = new SystemButton("<html>average<br>smoothing", 20, true);
+        this.averageSmoothingButton = new SystemButton("<html>ave<br>blur", 20, true);
         this.add(this.averageSmoothingButton);
 
         this.averageSmoothingButton.addActionListener(_ -> {
@@ -210,13 +211,22 @@ public class EditPanel extends JPanel {
             this.bufferedImage = averageSmoothing(this.bufferedImage);
         });
 
-        this.GaussianSmoothingButton = new SystemButton("<html>Gaussian<br>smoothing", 20, true);
+        this.GaussianSmoothingButton = new SystemButton("<html>Gau<br>blur", 20, true);
         this.add(this.GaussianSmoothingButton);
 
         this.GaussianSmoothingButton.addActionListener(_ -> {
             this.nextBufferedStack.clear();
             this.previousBufferedStack.push(this.bufferedImage);
             this.bufferedImage = GaussianSmoothing(this.bufferedImage);
+        });
+
+        this.negativeButton = new SystemButton("neg", 20, true);
+        this.add(this.negativeButton);
+
+        this.negativeButton.addActionListener(_ -> {
+            this.nextBufferedStack.clear();
+            this.previousBufferedStack.push(this.bufferedImage);
+            this.bufferedImage = negative(this.bufferedImage);
         });
 
         this.brightButton = new SystemButton("bright", 20, true);
@@ -438,6 +448,23 @@ public class EditPanel extends JPanel {
         return output;
     }
 
+    public BufferedImage glitch(BufferedImage original) {
+        BufferedImage output = deepCopy(original);
+        int moves = 1;
+        for (int x = moves; x < original.getWidth() - moves; x++) {
+            for (int y = 0; y < original.getHeight(); y++) {
+                if ((y / moves) % 2 == 0) {
+                    output.setRGB(x, y, original.getRGB(x - moves, y));
+                }else {
+                    output.setRGB(x, y, original.getRGB(x + moves, y));
+                }
+            }
+        }
+        labelPhoto.setIcon(new ImageIcon(output));
+        this.repaint();
+        return output;
+    }
+
     private BufferedImage averageSmoothing(BufferedImage original) {
         BufferedImage output = deepCopy(original);
 
@@ -620,6 +647,7 @@ public class EditPanel extends JPanel {
         this.mirrorUpButton.setVisible(false);
         this.averageSmoothingButton.setVisible(false);
         this.GaussianSmoothingButton.setVisible(false);
+        this.negativeButton.setVisible(false);
         this.brightButton.setVisible(false);
         this.saveButton.setVisible(false);
         this.darkBrightSlider.setVisible(false);
@@ -656,9 +684,11 @@ public class EditPanel extends JPanel {
         this.mirrorUpButton.setVisible(true);
         this.mirrorUpButton.setBounds(mirrorSideButton.getX() + mirrorSideButton.getWidth() + 5, mirrorSideButton.getY(), mirrorSideButton.getWidth(), mirrorSideButton.getHeight());
         this.averageSmoothingButton.setVisible(true);
-        this.averageSmoothingButton.setBounds(mirrorUpButton.getX() + mirrorUpButton.getWidth() + 5, mirrorUpButton.getY(), (int) (returnButton.getWidth() * 1.2), mirrorUpButton.getHeight());
+        this.averageSmoothingButton.setBounds(mirrorUpButton.getX() + mirrorUpButton.getWidth() + 5, mirrorUpButton.getY(), (int) (returnButton.getWidth() * 0.6), mirrorUpButton.getHeight());
         this.GaussianSmoothingButton.setVisible(true);
-        this.GaussianSmoothingButton.setBounds(averageSmoothingButton.getX() + averageSmoothingButton.getWidth() + 5, averageSmoothingButton.getY(), (int) (returnButton.getWidth() * 1.2), averageSmoothingButton.getHeight());
+        this.GaussianSmoothingButton.setBounds(averageSmoothingButton.getX() + averageSmoothingButton.getWidth() + 5, averageSmoothingButton.getY(), (int) (returnButton.getWidth() * 0.6), averageSmoothingButton.getHeight());
+        this.negativeButton.setVisible(true);
+        this.negativeButton.setBounds(GaussianSmoothingButton.getX() + GaussianSmoothingButton.getWidth() + 5, GaussianSmoothingButton.getY(), (int) (returnButton.getWidth() * 0.68), GaussianSmoothingButton.getHeight());
 
 //        this.brightButton.setVisible(true);
 //        this.brightButton.setBounds(smoothButton.getX() + smoothButton.getWidth() + 5, smoothButton.getY(), mirrorUpButton.getWidth(), smoothButton.getHeight());
