@@ -40,7 +40,7 @@ public class EditPanel extends JPanel {
     private JLabel typeOfError;
     private boolean isSizeImageValid;
     private int maxWindowWidth = 1000;
-    private int maxWindowHeight = 900;
+    private int maxWindowHeight = 820;
     private int minWindowWidth = 750;
     private int minWindowHeight = 600;
     private boolean isSizeImageMinimal;
@@ -295,7 +295,7 @@ public class EditPanel extends JPanel {
 
                 if (isSizeImageValid) {
 
-                    //550 - 800 width <> 400 - 700 height
+                    //550 - 800 width <> 400 - 620 height
                     //4 מקרים גובה רוחב  ***** לבדוק עם תמונות *****
                     if (isSizeImageMinimal) {
                         setMinimalPanelSize();
@@ -385,7 +385,7 @@ public class EditPanel extends JPanel {
 
         if (fileImage.exists()) { // ***** add a correct label *****
             System.out.println("Too big photo");
-            this.typeOfError.setText("<html><body style='text-align: justify; width: 300px;'>Your photo is too big.<br>Pay attention,the photo must be with a maximum size of 700 height by 800 width.</body></html>");
+            this.typeOfError.setText("<html><body style='text-align: justify; width: 300px;'>Your photo is too big.<br>Pay attention,the photo must be with a maximum size of 620 height by 800 width.</body></html>");
         } else {
             System.out.println("invalid URL, please try again");
             this.typeOfError.setText("<html><body style='text-align: justify; width: 300px;'>Your URL is invalid.<br>Pay attention, the URL address must include two backslashes between each folder. Also, the address must have no quotation marks on the sides and no spaces.</body></html>");
@@ -400,17 +400,17 @@ public class EditPanel extends JPanel {
                 int argb = original.getRGB(x, y);
                 Color currentColor = new Color(argb, true);
 
-                if (currentColor.getAlpha() == 0) {
-                    output.setRGB(x, y, 0);
-                } else {
-                    int alpha = 255 - currentColor.getAlpha();
+//                if (currentColor.getAlpha() == 0) {
+//                    output.setRGB(x, y, 0);
+//                } else {
+                    int alpha = currentColor.getAlpha();
                     int red = 255 - currentColor.getRed();
                     int green = 255 - currentColor.getGreen();
                     int blue = 255 - currentColor.getBlue();
 
                     Color updateColor = new Color(red, green, blue, alpha);
                     output.setRGB(x, y, updateColor.getRGB());
-                }
+//                }
             }
         }
 
@@ -474,13 +474,13 @@ public class EditPanel extends JPanel {
 
     public BufferedImage sideGlitch(BufferedImage original) {
         BufferedImage output = deepCopy(original);
-        int moves = 1;
+        int moves = 5;
         for (int x = moves; x < original.getWidth() - moves; x++) {
             for (int y = 0; y < original.getHeight(); y++) {
                 if ((y / moves) % 2 == 0) {
-                    output.setRGB(x, y, original.getRGB(x - moves, y));
+                    output.setRGB(x, y, original.getRGB(x - (y % moves), y));
                 } else {
-                    output.setRGB(x, y, original.getRGB(x + moves, y));
+                    output.setRGB(x, y, original.getRGB(x + (y % moves), y));
                 }
             }
         }
@@ -489,6 +489,24 @@ public class EditPanel extends JPanel {
         return output;
     }
 
+//     public BufferedImage anotherSideGlitch(BufferedImage original) {
+//        BufferedImage output = deepCopy(original);
+//        int moves = 10;
+//        for (int x = moves; x < original.getWidth() - moves; x++) {
+//            for (int y = 0; y < original.getHeight(); y++) {
+//                if ((y / moves) % 3 == 0) {
+//                    output.setRGB(x - moves, y, original.getRGB(x - (y % moves), y));
+//                } else if ((y / moves) % 3 == 1) {
+//                    output.setRGB(x, y, original.getRGB(x, y));
+//                } else {
+//                    output.setRGB(x, y, original.getRGB(x + (y % moves), y));
+//                }
+//            }
+//        }
+//        labelPhoto.setIcon(new ImageIcon(output));
+//        this.repaint();
+//        return output;
+//    }
     private BufferedImage averageSmoothing(BufferedImage original) {
         BufferedImage output = deepCopy(original);
 
