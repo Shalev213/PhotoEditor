@@ -31,11 +31,12 @@ public class EditPanel extends JPanel {
     private SystemButton negativeButton;
     private SystemButton sideGlitchButton;
     private SystemButton threeDimensionalEffectButton;
-    private SystemButton brightButton;
+    private SystemButton edgesDetectionButton;
     private SystemButton mirrorSideButton;
     private SystemButton mirrorUpButton;
     private SystemButton previousButton;
     private SystemButton nextButton;
+    private SystemButton brightButton;
     private BufferedImage bufferedImage;
     private JLabel labelPhoto;
     private JLabel typeOfError;
@@ -280,6 +281,16 @@ public class EditPanel extends JPanel {
             this.bufferedImage = deepCopy(threeDimensionalEffect(this.bufferedImage, 10));
             updateImageWithCurrentBrightness();
         });
+
+        this.edgesDetectionButton = new SystemButton("edges", 20, true);
+        this.add(this.edgesDetectionButton);
+
+        this.edgesDetectionButton.addActionListener(e -> {
+            this.nextBufferedStack.clear();
+            this.previousBufferedStack.push(this.bufferedImage);
+            this.bufferedImage = edgesDetection(this.bufferedImage);
+            updateImageWithCurrentBrightness();
+        });
     }
 
     private void resetArray(boolean[] changedValues, boolean value) {
@@ -476,6 +487,66 @@ public class EditPanel extends JPanel {
         for (int x = 0; x < original.getWidth(); x++) {
             for (int y = 0; y < original.getHeight(); y++) {
                 output.setRGB(x, y, original.getRGB(original.getWidth() - x - 1, y));
+            }
+        }
+        labelPhoto.setIcon(new ImageIcon(output));
+        this.repaint();
+        return output;
+    }
+
+    public BufferedImage edgesDetection(BufferedImage original) {
+        BufferedImage output = deepCopy(original);
+        for (int x = 1; x < original.getWidth() - 1; x++) {
+            for (int y = 1; y < original.getHeight() - 1; y++) {
+                int gxRed = (-1 * new Color(original.getRGB(x - 1, y - 1)).getRed()) +
+                        (-2 * new Color(original.getRGB(x - 1, y)).getRed()) +
+                        (-1 * new Color(original.getRGB(x - 1, y + 1)).getRed()) +
+                        (new Color(original.getRGB(x + 1, y - 1)).getRed()) +
+                        (2 * new Color(original.getRGB(x + 1, y)).getRed()) +
+                        (new Color(original.getRGB(x + 1, y + 1)).getRed());
+                int gyRed = (-1 * new Color(original.getRGB(x - 1, y - 1)).getRed()) +
+                        (-2 * new Color(original.getRGB(x, y - 1)).getRed()) +
+                        (-1 * new Color(original.getRGB(x + 1, y - 1)).getRed()) +
+                        (new Color(original.getRGB(x - 1, y + 1)).getRed()) +
+                        (2 * new Color(original.getRGB(x, y + 1)).getRed()) +
+                        (new Color(original.getRGB(x + 1, y + 1)).getRed());
+                int redGradientMagnitude = (int) Math.sqrt((gxRed * gxRed) + (gyRed * gyRed));
+                int newRed = Math.min(255, redGradientMagnitude);
+
+                int gxGreen = (-1 * new Color(original.getRGB(x - 1, y - 1)).getGreen()) +
+                        (-2 * new Color(original.getRGB(x - 1, y)).getGreen()) +
+                        (-1 * new Color(original.getRGB(x - 1, y + 1)).getGreen()) +
+                        (new Color(original.getRGB(x + 1, y - 1)).getGreen()) +
+                        (2 * new Color(original.getRGB(x + 1, y)).getGreen()) +
+                        (new Color(original.getRGB(x + 1, y + 1)).getGreen());
+                int gyGreen = (-1 * new Color(original.getRGB(x - 1, y - 1)).getGreen()) +
+                        (-2 * new Color(original.getRGB(x, y - 1)).getGreen()) +
+                        (-1 * new Color(original.getRGB(x + 1, y - 1)).getGreen()) +
+                        (new Color(original.getRGB(x - 1, y + 1)).getGreen()) +
+                        (2 * new Color(original.getRGB(x, y + 1)).getGreen()) +
+                        (new Color(original.getRGB(x + 1, y + 1)).getGreen());
+                int greenGradientMagnitude = (int) Math.sqrt((gxGreen * gxGreen) + (gyGreen * gyGreen));
+                int newGreen = Math.min(255, greenGradientMagnitude);
+
+                int gxBlue = (-1 * new Color(original.getRGB(x - 1, y - 1)).getBlue()) +
+                        (-2 * new Color(original.getRGB(x - 1, y)).getBlue()) +
+                        (-1 * new Color(original.getRGB(x - 1, y + 1)).getBlue()) +
+                        (new Color(original.getRGB(x + 1, y - 1)).getBlue()) +
+                        (2 * new Color(original.getRGB(x + 1, y)).getBlue()) +
+                        (new Color(original.getRGB(x + 1, y + 1)).getBlue());
+                int gyBlue = (-1 * new Color(original.getRGB(x - 1, y - 1)).getBlue()) +
+                        (-2 * new Color(original.getRGB(x, y - 1)).getBlue()) +
+                        (-1 * new Color(original.getRGB(x + 1, y - 1)).getBlue()) +
+                        (new Color(original.getRGB(x - 1, y + 1)).getBlue()) +
+                        (2 * new Color(original.getRGB(x, y + 1)).getBlue()) +
+                        (new Color(original.getRGB(x + 1, y + 1)).getBlue());
+                int blueGradientMagnitude = (int) Math.sqrt((gxBlue * gxBlue) + (gyBlue * gyBlue));
+                int newBlue = Math.min(255, blueGradientMagnitude);
+
+//                int alpha = new Color(original.getRGB(x,y)).getAlpha();
+                int average = (newRed + newGreen + newBlue) / 3;
+                Color newColor = new Color(average, average, average);
+                output.setRGB(x, y, newColor.getRGB());
             }
         }
         labelPhoto.setIcon(new ImageIcon(output));
@@ -715,6 +786,7 @@ public class EditPanel extends JPanel {
         this.negativeButton.setVisible(false);
         this.sideGlitchButton.setVisible(false);
         this.threeDimensionalEffectButton.setVisible(false);
+        this.edgesDetectionButton.setVisible(false);
 
 
         this.brightButton.setVisible(false);
@@ -746,8 +818,7 @@ public class EditPanel extends JPanel {
         this.previousButton.setBounds(10, 10, 70, 70);
         this.grayScaleButton.setVisible(true);
 //        this.grayScaleButton.setBounds(returnButton.getX() + returnButton.getWidth() + 5, returnButton.getY(), (int) (returnButton.getWidth() * 0.7), returnButton.getHeight());
-        this.grayScaleButton.setBounds(returnButton.getX(), returnButton.getY() - 80, (int) (returnButton.getWidth() * 0.8), returnButton.getHeight());
-
+        this.grayScaleButton.setBounds(returnButton.getX() - 10, returnButton.getY() - 80, (int) (returnButton.getWidth() * 0.8), returnButton.getHeight());
         this.mirrorSideButton.setVisible(true);
         this.mirrorSideButton.setBounds(grayScaleButton.getX() + grayScaleButton.getWidth() + 5, grayScaleButton.getY(), grayScaleButton.getWidth(), grayScaleButton.getHeight());
         this.mirrorUpButton.setVisible(true);
@@ -757,11 +828,13 @@ public class EditPanel extends JPanel {
         this.GaussianSmoothingButton.setVisible(true);
         this.GaussianSmoothingButton.setBounds(averageSmoothingButton.getX() + averageSmoothingButton.getWidth() + 5, averageSmoothingButton.getY(), (int) (returnButton.getWidth() * 0.6), averageSmoothingButton.getHeight());
         this.negativeButton.setVisible(true);
-        this.negativeButton.setBounds(GaussianSmoothingButton.getX() + GaussianSmoothingButton.getWidth() + 5, GaussianSmoothingButton.getY(), (int) (returnButton.getWidth() * 0.68), GaussianSmoothingButton.getHeight());
+        this.negativeButton.setBounds(GaussianSmoothingButton.getX() + GaussianSmoothingButton.getWidth() + 5, GaussianSmoothingButton.getY(), (int) (returnButton.getWidth() * 0.66), GaussianSmoothingButton.getHeight());
         this.sideGlitchButton.setVisible(true);
         this.sideGlitchButton.setBounds(negativeButton.getX() + negativeButton.getWidth() + 5, negativeButton.getY(), (int) (returnButton.getWidth() * 0.8), negativeButton.getHeight());
         this.threeDimensionalEffectButton.setVisible(true);
         this.threeDimensionalEffectButton.setBounds(sideGlitchButton.getX() + sideGlitchButton.getWidth() + 5, sideGlitchButton.getY(), (int) (returnButton.getWidth() * 0.6), sideGlitchButton.getHeight());
+        this.edgesDetectionButton.setVisible(true);
+        this.edgesDetectionButton.setBounds(threeDimensionalEffectButton.getX() + threeDimensionalEffectButton.getWidth() + 5, threeDimensionalEffectButton.getY(), (int) (returnButton.getWidth() * 0.88), threeDimensionalEffectButton.getHeight());
 
 //        this.brightButton.setVisible(true);
 //        this.brightButton.setBounds(smoothButton.getX() + smoothButton.getWidth() + 5, smoothButton.getY(), mirrorUpButton.getWidth(), smoothButton.getHeight());
