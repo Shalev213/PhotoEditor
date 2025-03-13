@@ -597,17 +597,17 @@ public class EditPanel extends JPanel {
 //        return output;
 //    }
 
-         public BufferedImage sideGlitch(BufferedImage original) {
+    public BufferedImage sideGlitch(BufferedImage original) {
         BufferedImage output = deepCopy(original);
-        int moves = 10;
-        for (int x = moves; x < original.getWidth() - moves; x++) {
+        int shift = 10;
+        for (int x = shift; x < original.getWidth() - shift; x++) {
             for (int y = 0; y < original.getHeight(); y++) {
-                if ((y / moves) % 3 == 0) {
-                    output.setRGB(x - moves, y, original.getRGB(x - (y % moves), y));
-                } else if ((y / moves) % 3 == 1) {
+                if ((y / shift) % 3 == 0) {
+                    output.setRGB(x - shift, y, original.getRGB(x - (y % shift), y));
+                } else if ((y / shift) % 3 == 1) {
                     output.setRGB(x, y, original.getRGB(x, y));
                 } else {
-                    output.setRGB(x, y, original.getRGB(x + (y % moves), y));
+                    output.setRGB(x, y, original.getRGB(x + (y % shift), y));
                 }
             }
         }
@@ -615,6 +615,7 @@ public class EditPanel extends JPanel {
         this.repaint();
         return output;
     }
+
     private BufferedImage averageSmoothing(BufferedImage original) {
         BufferedImage output = deepCopy(original);
 
