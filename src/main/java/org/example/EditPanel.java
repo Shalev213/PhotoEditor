@@ -580,32 +580,13 @@ public class EditPanel extends JPanel {
         return result;
     }
 
-    public BufferedImage sideGlitch(BufferedImage original) {
-        BufferedImage output = deepCopy(original);
-        int moves = 5;
-        for (int x = moves; x < original.getWidth() - moves; x++) {
-            for (int y = 0; y < original.getHeight(); y++) {
-                if ((y / moves) % 2 == 0) {
-                    output.setRGB(x, y, original.getRGB(x - (y % moves), y));
-                } else {
-                    output.setRGB(x, y, original.getRGB(x + (y % moves), y));
-                }
-            }
-        }
-        labelPhoto.setIcon(new ImageIcon(output));
-        this.repaint();
-        return output;
-    }
-
-    //     public BufferedImage anotherSideGlitch(BufferedImage original) {
+//    public BufferedImage sideGlitch(BufferedImage original) {
 //        BufferedImage output = deepCopy(original);
-//        int moves = 10;
+//        int moves = 5;
 //        for (int x = moves; x < original.getWidth() - moves; x++) {
 //            for (int y = 0; y < original.getHeight(); y++) {
-//                if ((y / moves) % 3 == 0) {
-//                    output.setRGB(x - moves, y, original.getRGB(x - (y % moves), y));
-//                } else if ((y / moves) % 3 == 1) {
-//                    output.setRGB(x, y, original.getRGB(x, y));
+//                if ((y / moves) % 2 == 0) {
+//                    output.setRGB(x, y, original.getRGB(x - (y % moves), y));
 //                } else {
 //                    output.setRGB(x, y, original.getRGB(x + (y % moves), y));
 //                }
@@ -615,6 +596,25 @@ public class EditPanel extends JPanel {
 //        this.repaint();
 //        return output;
 //    }
+
+         public BufferedImage sideGlitch(BufferedImage original) {
+        BufferedImage output = deepCopy(original);
+        int moves = 10;
+        for (int x = moves; x < original.getWidth() - moves; x++) {
+            for (int y = 0; y < original.getHeight(); y++) {
+                if ((y / moves) % 3 == 0) {
+                    output.setRGB(x - moves, y, original.getRGB(x - (y % moves), y));
+                } else if ((y / moves) % 3 == 1) {
+                    output.setRGB(x, y, original.getRGB(x, y));
+                } else {
+                    output.setRGB(x, y, original.getRGB(x + (y % moves), y));
+                }
+            }
+        }
+        labelPhoto.setIcon(new ImageIcon(output));
+        this.repaint();
+        return output;
+    }
     private BufferedImage averageSmoothing(BufferedImage original) {
         BufferedImage output = deepCopy(original);
 
