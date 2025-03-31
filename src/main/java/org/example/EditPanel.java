@@ -616,6 +616,49 @@ public class EditPanel extends JPanel {
         return output;
     }
 
+    public BufferedImage sharpenImage(BufferedImage original) {
+        BufferedImage output = deepCopy(original);
+
+        float[][] kernel = {
+                {  0, -1,  0 },
+                { -1,  5, -1 },
+                {  0, -1,  0 }
+        };
+
+        int width = original.getWidth();
+        int height = original.getHeight();
+
+        for (int x = 1; x < width - 1; x++) {
+            for (int y = 1; y < height - 1; y++) {
+                float red = 0, green = 0, blue = 0;
+
+                // החלת הקונבולוציה על הפיקסל והסביבה שלו
+                for (int i = -1; i <= 1; i++) {
+                    for (int j = -1; j <= 1; j++) {
+                        int rgb = original.getRGB(x + i, y + j);
+                        Color color = new Color(rgb);
+
+                        red += color.getRed() * kernel[i + 1][j + 1];
+                        green += color.getGreen() * kernel[i + 1][j + 1];
+                        blue += color.getBlue() * kernel[i + 1][j + 1];
+                    }
+                }
+
+                // תחימת הערכים ל- 0-255
+                int newRed = Math.min(255, Math.max(0, (int) red));
+                int newGreen = Math.min(255, Math.max(0, (int) green));
+                int newBlue = Math.min(255, Math.max(0, (int) blue));
+
+                output.setRGB(x, y, new Color(newRed, newGreen, newBlue).getRGB());
+            }
+        }
+
+        labelPhoto.setIcon(new ImageIcon(output));
+        this.repaint();
+        return output;
+    }
+
+
     private BufferedImage averageSmoothing(BufferedImage original) {
         BufferedImage output = deepCopy(original);
 
