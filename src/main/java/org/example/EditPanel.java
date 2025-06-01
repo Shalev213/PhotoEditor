@@ -11,8 +11,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
-import java.util.Hashtable;
-import java.util.Stack;
+import java.util.*;
 
 public class EditPanel extends JPanel {
     private final ImageIcon lobbyBackground;
@@ -59,9 +58,12 @@ public class EditPanel extends JPanel {
     private int returnButtonX = 15;
     private int currentHeight;
     private int currentWidth;
+    Map<Character, int[]> encodingMap = new HashMap<>();
+    Map<String, Character> decodingMap = new HashMap<>();
 
     //  *********** add a shadow *********
     public EditPanel() {
+        initAlphabet();
         this.lobbyBackground = new ImageIcon("src/main/resources/EditorBackground.png");
 
         this.changedValues = new boolean[7];
@@ -494,6 +496,7 @@ public class EditPanel extends JPanel {
         return output;
     }
 
+
     public BufferedImage edgesDetection(BufferedImage original) {
         BufferedImage output = deepCopy(original);
         for (int x = 1; x < original.getWidth() - 1; x++) {
@@ -620,9 +623,9 @@ public class EditPanel extends JPanel {
         BufferedImage output = deepCopy(original);
 
         float[][] kernel = {
-                {  0, -1,  0 },
-                { -1,  5, -1 },
-                {  0, -1,  0 }
+                {0, -1, 0},
+                {-1, 5, -1},
+                {0, -1, 0}
         };
 
         int width = original.getWidth();
@@ -933,6 +936,123 @@ public class EditPanel extends JPanel {
             }
         }
     }
+
+    public void initAlphabet() {
+        // קידוד אותיות A–Z
+
+
+        for (int i = 0; i < 26; i++) {
+            char ch = (char) ('A' + i);
+            String binary = String.format("%5s", Integer.toBinaryString(i)).replace(' ', '0');
+            int[] bits = binaryToBits(binary);
+
+            encodingMap.put(ch, bits);
+            decodingMap.put(Arrays.toString(bits), ch);
+        }
+
+        // קידוד לרווח - נניח שהוא 26 → "11010"
+        char spaceChar = ' ';
+        String spaceBinary = String.format("%5s", Integer.toBinaryString(26)).replace(' ', '0');
+        int[] spaceBits = binaryToBits(spaceBinary);
+        encodingMap.put(spaceChar, spaceBits);
+        decodingMap.put(Arrays.toString(spaceBits), spaceChar);
+
+        // תו עצירה ~ כקוד קבוע: 11111
+        char endChar = '~';
+        int[] endBits = {1, 1, 1, 1, 1};
+        encodingMap.put(endChar, endBits);
+        decodingMap.put(Arrays.toString(endBits), endChar);
+    }
+
+    private int[] binaryToBits(String binary) {
+        int[] bits = new int[5];
+        for (int i = 0; i < 5; i++) {
+            bits[i] = binary.charAt(i) - '0';
+        }
+        return bits;
+    }
+
+    public BufferedImage encode(BufferedImage original, String text) {
+        BufferedImage output = deepCopy(original);
+        initAlphabet(); // יוצר את מפת הקידוד
+
+        text = text.toUpperCase();
+        text += "~";
+        int charIndex = 0, bitIndex = 0;
+        int textLength = text.length();
+
+        for (int y = 0; y < output.getHeight(); y++) {
+            for (int x = 0; x < output.getWidth(); x++) {
+                if (charIndex >= textLength) {
+                    labelPhoto.setIcon(new ImageIcon(output));
+                    this.repaint();
+                    return output;
+                }
+
+                char currentChar = text.charAt(charIndex);
+                int[] bits = encodingMap.get(currentChar);
+                if (bits == null) continue;
+
+                int bit = bits[bitIndex];
+
+                Color color = new Color(output.getRGB(x, y));
+                int r = color.getRed();
+                int g = color.getGreen();
+                int b = color.getBlue();
+
+                int sum = r + g + b;
+                boolean isEven = sum % 2 == 0;
+
+                if ((bit == 0 && !isEven) || (bit == 1 && isEven)) {
+                    b = (b + 1) % 256; // שינוי קטן כדי לשנות את הזוגיות
+                }
+
+                Color newColor = new Color(r, g, b);
+                output.setRGB(x, y, newColor.getRGB());
+
+                bitIndex++;
+                if (bitIndex == 5) {
+                    bitIndex = 0;
+                    charIndex++;
+                }
+            }
+        }
+        labelPhoto.setIcon(new ImageIcon(output));
+        this.repaint();
+        return output;
+    }
+
+    public String decode(BufferedImage image) {
+        initAlphabet(); // חשוב!
+
+        StringBuilder decodedText = new StringBuilder();
+        int bitIndex = 0;
+        int[] bits = new int[5];
+
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                Color color = new Color(image.getRGB(x, y));
+                int sum = color.getRed() + color.getGreen() + color.getBlue();
+                bits[bitIndex] = (sum % 2 == 0) ? 0 : 1;
+                bitIndex++;
+
+                if (bitIndex == 5) {
+                    String key = Arrays.toString(bits);
+                    Character decodedChar = decodingMap.get(key);
+                    if (decodedChar != null) {
+                        if (decodedChar == '~') return decodedText.toString(); // עצרנו
+                        decodedText.append(decodedChar);
+                    } else {
+                        decodedText.append('?'); // שגיאה
+                    }
+                    bitIndex = 0;
+                }
+            }
+        }
+
+        return decodedText.toString();
+    }
+
 
 }
 
